@@ -176,8 +176,18 @@ class Structure:
 
         return True
 
-    @staticmethod
-    def get_most_similar_info(source_info: ParameterInfo, win_infos: List[ParameterInfo], threshold: float = 0.1) -> Optional[int]:
+    def get_similarity(self, source_info: ParameterInfo, win_infos: List[ParameterInfo]) -> Tuple[float, int]:
+        """compute the the similarity between source info and window's info
+
+        Args:
+            source_info (ParameterInfo): source info to be compared 
+            win_infos (List[ParameterInfo]): infos of window, which contains the potential param info object
+
+        Returns:
+            Tuple[float, int]: max-score and target index of window,
+                if there is no target param info, the index will be -1. 
+                max-score present the max similarity comared between source info and win_infos
+        """
         def tokenize(txt):
             """Get tuples that doesn't use textblob."""
             tokens = []
@@ -205,13 +215,25 @@ class Structure:
                 tokenize(source_info.name),
                 tokenize(win_info.name)
             )
-            if score > max_score and score > threshold:
+            if score > max_score and score > self.threshold:
                 max_score = score
                 result = index
         return result, max_score
 
     @staticmethod
     def find_target_in_window(source_info: ParameterInfo, win_infos: List[ParameterInfo]) -> ParameterInfo:
+        """find the target param info in windows infos
+
+        Args:
+            source_info (ParameterInfo): the soruce param info object
+            win_infos (List[ParameterInfo]): window of infos which will be 
+
+        Raises:
+            ValueError: _description_
+
+        Returns:
+            ParameterInfo: _description_
+        """
         # 1. filter infos
         infos = []
         for info in win_infos:
@@ -229,7 +251,7 @@ class Structure:
                 infos.append(info)
 
         # 2. using the jaccard distance to get the target similarity
-        result_index, score = Structure.get_most_similar_info(source_info, infos)
+        result_index, score = Structure.get_similarity(source_info, infos)
         if result_index == -1:
             return result_index, 0
         for index, win_info in enumerate(win_infos):
