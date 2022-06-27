@@ -358,6 +358,9 @@ class Torch2PaddleConverter:
             if torch.is_tensor(param):
                 param = param.numpy()
             
+            # TODO:dtype should be read from the paddle-result field
+            param = paddle.to_tensor(param, dtype=paddle.float32)
+
             paddle_weight[target_name] = param
             
         paddle.save(paddle_weight, output_file)
@@ -436,7 +439,7 @@ class Command:
         Torch2PaddleConverter.from_mapping_file(
             torch_file=torch_file,
             output_file=output_file,
-            mapping_file=diff_file
+            mapping_file=diff_file,
         ) 
     
     def summary(self, torch_file: str, paddle_file: str, diff_file: str):
