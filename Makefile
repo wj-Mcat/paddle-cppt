@@ -142,3 +142,18 @@ deploy-version:
 .PHONY: doc
 doc:
 	mkdocs serve
+
+
+.PHONY: diff
+diff:
+	python -m src.cppt.cli gen_diff \
+		--torch_file=/root/paddle/PaddleNLP/pretrained/torch/opt-125m/pytorch_model.bin \
+		--paddle_file=/root/paddle/PaddleNLP/pretrained/paddle/opt-125m-empty/model_state.pdparams \
+		--prefix_words=model.,opt. \
+		--output_file=diff.xlsx --auto_match
+
+summary:
+	python -m src.cppt.cli summary \
+		--torch_file=/root/paddle/PaddleNLP/pretrained/torch/opt-125m/pytorch_model.bin \
+		--paddle_file=/root/paddle/PaddleNLP/pretrained/paddle/opt-125m/model_state.pdparams \
+		--diff_file=diff-result.xlsx

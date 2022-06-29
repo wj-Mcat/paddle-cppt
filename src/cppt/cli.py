@@ -1,6 +1,7 @@
 from __future__ import annotations
 import os
 from copy import deepcopy
+import numpy as np
 
 from typing import (
     Callable,
@@ -19,6 +20,9 @@ import fire
 from tabulate import tabulate
 from loguru import logger 
 from cppt.config import SIMILARITY_TOKENS
+
+
+structure: Structure = None
 
 
 class ParameterType(Enum):
@@ -51,7 +55,7 @@ class ParameterInfo:
                 ParameterInfo(
                     name=name,
                     shape=eval(shape),
-                    type=Structure.guess_type_by_name(name)
+                    type=structure.guess_type_by_name(name)
                 )
             )
         return infos
@@ -64,14 +68,17 @@ class ParameterInfo:
             ParameterInfo(
                 name=name,
                 shape=shapes[index],
-                type=Structure.guess_type_by_name(name)
+                type=structure.guess_type_by_name(name)
             )
             for index, name in enumerate(names)]
 
 
 class Structure:
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: Optional[str] = None, threshold: float = 0.3, prefix_words: str = '', window_size: int = 16):
+        self.threshold = threshold
+        self.window_size = window_size
         self.config: Dict[str, List[str]] = deepcopy(SIMILARITY_TOKENS)
+        self.prefix_words = prefix_words.split(',')
 
         if config_file:
             with open(config_file, 'r', encoding='utf-8') as f:
@@ -80,9 +87,14 @@ class Structure:
                 if type_name not in self.config:
                     self.config[type_name] = []
                 self.config[type_name].extend(tokens)
+    
+    def remove_prefix_word(self, name: str) -> str:
+        for prefix_word in self.prefix_words:
+            if name.startswith(prefix_word):
+                name = name.replace(prefix_word, '')
+        return name
 
-    @staticmethod
-    def extract_name_shapes(handler, weight_file: str) -> List[ParameterInfo]:
+    def extract_name_shapes(self, handler, weight_file: str) -> List[ParameterInfo]:
         """extract pytorch/paddle based model <name>-<shape> structure to the excel file   
 
         Args:
@@ -101,7 +113,7 @@ class Structure:
                 name=name,
                 shape=list(tensor.shape),
                 dtype=tensor.dtype,
-                type=Structure.guess_type_by_name(name)
+                type=self.guess_type_by_name(name)
             ))
         return infos
 
@@ -112,7 +124,7 @@ class Structure:
             ) 
             return False
 
-        for keyword in keywords:
+        for keyword in self.config.get(type_name, []):
             if keyword in name:
                 return True
         return False
@@ -147,11 +159,15 @@ class Structure:
 
         return ParameterType.Unknown
 
-    @staticmethod
-    def is_same_layer(first_name: str, second_name: str) -> bool:
+    def is_same_layer(self, first_name: str, second_name: str) -> bool:
+        first_name, second_name = self.remove_prefix_word(first_name), self.remove_prefix_word(second_name)
+
         pattern = re.compile(r'\.[0-9]+', re.I)
         first_result = re.findall(pattern, first_name)
         second_result = re.findall(pattern, second_name)
+
+        if not first_result and not second_result:
+            return True
 
         # 1. if there is someone in the list layer, and the other is not
         if not first_result or not second_result:
@@ -166,41 +182,46 @@ class Structure:
                 if first_result[i] != second_result[i]:
                     return False
                 
-                # 2.1 compare & remove the prefix -> aa.0.bb bb.0.bb
-                first_name_prefix = first_name[:first_name.index(first_result[i])]
-                second_name_prefix = second_name[:second_name.index(second_result[i])]
-                if first_name_prefix != second_name_prefix:
-                    return False
-                first_name = first_name[len(first_name_prefix) + len(first_result[i]):]
-                second_name = second_name[len(second_name_prefix) + len(second_result[i])]
+                # # 2.1 compare & remove the prefix -> aa.0.bb bb.0.bb
+                # first_name_prefix = first_name[:first_name.index(first_result[i])]
+                # second_name_prefix = second_name[:second_name.index(second_result[i])]
+                # if first_name_prefix != second_name_prefix:
+                #     return False
+                # first_name = first_name[len(first_name_prefix) + len(first_result[i]):]
+                # second_name = second_name[len(second_name_prefix) + len(second_result[i])]
 
         return True
 
-    def get_similarity(self, source_info: ParameterInfo, win_infos: List[ParameterInfo]) -> Tuple[float, int]:
+    def get_similarity(self, source_info: ParameterInfo, win_infos: List[ParameterInfo]) -> Tuple[int, float]:
         """compute the the similarity between source info and window's info
 
         Args:
-            source_info (ParameterInfo): source info to be compared 
+            source_info (ParameterInfo): source info to be compared
             win_infos (List[ParameterInfo]): infos of window, which contains the potential param info object
 
         Returns:
             Tuple[float, int]: max-score and target index of window,
-                if there is no target param info, the index will be -1. 
+                if there is no target param info, the index will be -1.
                 max-score present the max similarity comared between source info and win_infos
         """
         def tokenize(txt):
             """Get tuples that doesn't use textblob."""
+
+            # remove the prefix
+            txt = self.remove_prefix_word(txt)
             tokens = []
             for token in txt.split('.'):
-                tokens.extend(
-                    token.split('_')
-                )
+                sub_tokens = token.split('_')
+                for sub_token in sub_tokens:
+                    if re.search('[0-9]', sub_token):
+                        tokens.append(sub_token[-1])
+                        sub_token = sub_token[:-1]
+                    tokens.append(sub_token)
 
             for index, token in enumerate(tokens):
-                for domain_tokens in similarity_tokens:
+                for domain_tokens in self.config.values():
                     if token in domain_tokens:
                         tokens[index] = domain_tokens[0]
-
             return tokens
 
         def jaccard_distance(a, b):
@@ -220,8 +241,7 @@ class Structure:
                 result = index
         return result, max_score
 
-    @staticmethod
-    def find_target_in_window(source_info: ParameterInfo, win_infos: List[ParameterInfo]) -> ParameterInfo:
+    def find_target_in_window(self, source_info: ParameterInfo, win_infos: List[ParameterInfo]) -> ParameterInfo:
         """find the target param info in windows infos
 
         Args:
@@ -240,7 +260,7 @@ class Structure:
             if info.type != source_info.type:
                 continue
 
-            if not Structure.is_same_layer(source_info.name, info.name):
+            if not self.is_same_layer(source_info.name, info.name):
                 continue
         
             # 如果是Linear的话，两者交换其实也是对应上的
@@ -251,7 +271,7 @@ class Structure:
                 infos.append(info)
 
         # 2. using the jaccard distance to get the target similarity
-        result_index, score = Structure.get_similarity(source_info, infos)
+        result_index, score = self.get_similarity(source_info, infos)
         if result_index == -1:
             return result_index, 0
         for index, win_info in enumerate(win_infos):
@@ -259,13 +279,15 @@ class Structure:
                 return index, score
         raise ValueError(f'result index not found ...')
 
-    @staticmethod
-    def auto_match(source_infos: List[ParameterInfo], target_infos: List[ParameterInfo]) -> List[Tuple[str, float]]:
-        target_index = 10
+    def auto_match(self, source_infos: List[ParameterInfo], target_infos: List[ParameterInfo]) -> List[Tuple[str, float]]:
+        target_index = self.window_size
         window: List[ParameterInfo] = target_infos[:target_index]
+
         names = []
         for source_info in source_infos:
-            index, score = Structure.find_target_in_window(
+            if source_info.name == 'model.decoder.layers.0.fc1.weight':
+                a = ''
+            index, score = self.find_target_in_window(
                 source_info,
                 window
             )
@@ -281,8 +303,7 @@ class Structure:
                 target_index += 1
         return names
 
-    @staticmethod
-    def match_from_diff_file(diff_file: str, output_file: str, config_file: str):
+    def match_from_diff_file(self, diff_file: str, output_file: str):
         print(diff_file)
         source_infos = ParameterInfo.from_excel_file(
             file=diff_file,
@@ -290,7 +311,7 @@ class Structure:
             shape_field='torch-shape'
         )
         paddle_infos = ParameterInfo.from_excel_file(file=diff_file)
-        name_scores: List[str] = Structure.auto_match(
+        name_scores: List[str] = self.auto_match(
             source_infos,
             paddle_infos
         )
@@ -309,7 +330,7 @@ class Structure:
         series = []
 
         df = pd.read_excel(diff_file)
-        for _, row in df.iterrows(name, 'norm'):
+        for _, row in df.iterrows():
             name = row['torch-name']
             if pd.isna(name):
                 continue
@@ -355,6 +376,7 @@ class Torch2PaddleConverter:
             param = torch_weight[torch_name]
             if row['result-type'] == ParameterType.LinearWeight.value:                    
                 param = param.T
+            
             if torch.is_tensor(param):
                 param = param.numpy()
             
@@ -399,7 +421,7 @@ class Command:
     """a command tools for paddlepaddle
     """
 
-    def gen_diff(self, torch_file: str, paddle_file: str, output_file: str, auto_match: bool = False, config_file: Optional[str] = None):
+    def gen_diff(self, torch_file: str, paddle_file: str, output_file: str, auto_match: bool = False, config_file: Optional[str] = None, prefix_words: str = ''):
         """generate the difference shapes of torch file and paddle file
 
         Args:
@@ -409,9 +431,14 @@ class Command:
             auto_match (bool): auto match the model structure
             config_file (Optional[str]): the configuration file to specific the model specific features
         """
+        global structure
+        structure = Structure(config_file=config_file, prefix_words=prefix_words)
 
-        torch_shape_info = Structure.extract_name_shapes(torch, torch_file)
-        paddle_shape_info = Structure.extract_name_shapes(paddle, paddle_file)
+        logger.info('extract pytorch model metadata info ...')
+        torch_shape_info = structure.extract_name_shapes(torch, torch_file)
+
+        logger.info('extract paddle model metadata info ...')
+        paddle_shape_info = structure.extract_name_shapes(paddle, paddle_file)
 
         max_size = max(len(torch_shape_info), len(paddle_shape_info))
         series = []
@@ -433,7 +460,13 @@ class Command:
         pd.DataFrame(series).to_excel(output_file, index=False)
         
         if auto_match:
-            Structure.match_from_diff_file(output_file, output_file)
+            self.auto_match(output_file, output_file)
+
+    def auto_match(self, diff_file: str, output_file: str, config_file: Optional[str] = None, prefix_words: str = ''):
+        global structure
+        structure = Structure(config_file=config_file, prefix_words=prefix_words)
+
+        structure.match_from_diff_file(diff_file, output_file)
 
     def convert(self, torch_file: str, diff_file: str, output_file: str):
         Torch2PaddleConverter.from_mapping_file(
@@ -463,17 +496,24 @@ class Command:
             torch_tensor = torch_state_dict.pop(torch_name)
             paddle_tensor = paddle_state_dict.pop(paddle_name)
 
-            tables.append(
-                [
+            diff = [
                     torch_name,
                     torch.sum(torch_tensor).numpy().item(),
 
                     paddle_name,
-                    paddle.sum(paddle_tensor).numpy().item()
+                    paddle.sum(paddle_tensor).numpy().item(),
+
                 ]
+            diff.append(
+                f'{np.sum(np.abs(torch.sum(torch_tensor).numpy() - paddle.sum(paddle_tensor).numpy())):.6f}'
             )
+            tables.append(diff)
         
-        print(tabulate(tables, headers=['torch-name', 'torch-sum', 'paddle-name', 'paddle-sum'], tablefmt='grid'))
+        print(tabulate(tables, headers=['torch-name', 'torch-sum', 'paddle-name', 'paddle-sum', 'abs-diff'], tablefmt='grid'))
 
 def main():
     fire.Fire(Command)
+
+
+if __name__ == "__main__":
+    main()

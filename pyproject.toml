@@ -19,4 +19,4 @@ testpaths = [
 markers = [
     "asyncio"
 ]
-pythonpath='./src'
+pythonpath = "./src"
