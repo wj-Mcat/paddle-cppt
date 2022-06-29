@@ -6,11 +6,32 @@ This Repo contains the toolkit that help you transform the pytorch model to padd
 
 ## Features
 
-* generate the diff between paddle weight and torch weight file ...
-* convert the torch weight file to paddle weight file ...
-* summary the info between paddle weight and torch weight file ...
+* `cppt gen_diff`: generate the diff between paddle weight and torch weight file, for more details you check out ...
+* `cppt auto_match`: auto match the names of paddle and torch occording to the name semantic, eg: torch.model.embeddings.embed_token.weight -> paddle.opt.model.word_embeddings.weight ...
+* `cppt convert`: convert the torch weight file to paddle weight file according to the diff file ...
+* `cppt summary`: summary the tensor meta info according to the weight files and diff file ...
 
-## Getting Started
+## Intro
+
+In order to convert pytorch weight file to paddle weight file and make sure that the logits of paddle model is absolute align with pytorch, there are some steps you should follow.
+
+* first, you should get the layer names of you paddle model. In this abastract, you can init the paddle model with the same configuration as pytorch model, and save the state_dict.
+* second, in order to convert pytorch weight file to paddle weight file, you should find the name mapping between weight files, so you can load the state dict of paddle weight and pytorch weight file and find the diffs. In this abstract, you can use the command `cppt gen_diff` to find the diffs between layer names. 
+* third, mapping the names between pytorch and paddle models is a boring work, so let's make it more intelligent. You can use `cppt auto_match` command to auto match the names with similarity algo. you can edit the final diff file, and make it correct. 
+* fourth, you get the correct name mapping with third step, you can use the `cppt convert` command to convet the pytorch weight file to paddle weight file. In this abstract, the script will automaticly transpose the linear-weight tensor.
+* finaly, in order to checking the tensor data of paddle weight file, you can use the command `cppt summary` the generate the meta info between paddle weight file.
+
+So, it's cool right ? these codes help me `converting` work more soft.
+
+But, there are also some great works can be done:
+
+- [ ] compare the computing gragh between pytorch and paddle code. 
+- [ ] compare the outputs of different layers, eg: embedding layer, transformer layer, lm_head layer and so on. 
+- [ ] convert the pytorch code to paddle code using the ast. Objecoive： We can't convert it and make it run at onece, but you can convert it and edit it with simple works to make it run. 
+
+If you have more ideas about it, you can post [issue](https://github.com/wj-Mcat/paddle-cppt/issues/new) to discuss with us. We look forward to discussing it with you. 
+
+## Quick Start
 
 ### Installation
 
@@ -18,7 +39,19 @@ This Repo contains the toolkit that help you transform the pytorch model to padd
 pip install paddle-cppt
 ```
 
-## gen diff
+or install from the source code:
+
+```shell
+git clone https://github.com/wj-Mcat/paddle-cppt
+cd paddle-cpp
+python setup.py install
+```
+
+### Gen Paddle Weight
+
+### `cppt gen_diff`
+
+this command will generate the name mapping 
 
 ```shell
 cppt gen_diff \
@@ -54,17 +87,30 @@ with this command, you will get the `diff.xlsx` file which contains the layer na
 | encoder.layer.0.output.LayerNorm.bias             | [768]        | torch.float32 | norm          | encoder.layers.1.self_attn.q_proj.weight   | [768, 768]   | paddle.float32 | linear-weight |
 
 
+## `cppt auto_match`
 
-## convert torch model to paddle weight
+this command will generate the final name mapping into the excel file.
+
+```shell
+cppt auto_match \
+    --diff_file=/path/to/diff.xlsx \
+    --output_file=/path/to/diff-result.xlsx
+```
+
+## `cppt convert`
+
+convert torch model to paddle weight according the final diff file.
 
 ```shell
 cppt convert \
     --torch_file=/path/to/pytorch_model.bin \
     --output_file=/path/to/model_state.pdparams \
-    --diff_file=/path/to/diff.xlsx
+    --diff_file=/path/to/diff-result.xlsx
 ```
 
-## print the summary info between torch and paddle model
+## `cppt summary`
+
+print the summary metadata info between torch and paddle model
 
 ```shell
 cppt summary \
