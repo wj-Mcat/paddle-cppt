@@ -1,3 +1,2 @@
-astor
 dataclasses-json
 tabulate
