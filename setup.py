@@ -46,7 +46,7 @@ def get_version() -> str:
             )
     ) as version_fh:
         # Get X.Y.Z
-        version = version_fh.read().strip()
+            version = version_fh.read().strip()
         # versioning from X.Y.Z to X.Y.devZ
         version = versioning(version)
 
@@ -75,6 +75,11 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     license='Apache-2.0',
     url='https://github.com/wj-Mcat/paddle-cppt',
+    project_urls={
+        "Document": 'http://paddle-cppt.readthedocs.io/',
+        "FAQ": "http://paddle-cppt.readthedocs.io/",
+        "Quick Start": "http://paddle-cppt.readthedocs.io/"
+    },
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     install_requires=get_install_requires(),
