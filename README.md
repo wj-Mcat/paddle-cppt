@@ -4,8 +4,6 @@
 Convert Pytorch to Paddle Toolkit
 </div>
 
-## Documentation
-
 <div align="center">
 
 [![wj-Mcat - paddle-cppt](https://img.shields.io/static/v1?label=wj-Mcat&message=paddle-cppt&color=blue&logo=github)](https://github.com/wj-Mcat/paddle-cppt "Go to GitHub repo")
@@ -19,17 +17,6 @@ Convert Pytorch to Paddle Toolkit
 
 </div>
 
-
-<div align="center">
-
-
-
-
-
-</div>
-
-
-Convert Pytorch to Paddle Toolkit
 
 This Repo contains the toolkit that help you transform the pytorch model to paddle model. eg: Weight file Comparer, Weight Converter, Weight Summary, and so on ...
 
@@ -157,31 +144,8 @@ cppt summary \
 
 ## Creators
 
-_Social buttons_
 
 [![wj-Mcat - paddle-cppt](https://img.shields.io/static/v1?label=wj-Mcat&message=paddle-cppt&color=blue&logo=github)](https://github.com/wj-Mcat/paddle-cppt "Go to GitHub repo")
-[![stars - paddle-cppt](https://img.shields.io/github/stars/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
-[![forks - paddle-cppt](https://img.shields.io/github/forks/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
-
-
-_Repo metadata_
-
-[![pypi](https://github.com/wj-Mcat/paddle-cppt/workflows/pypi/badge.svg)](https://github.com/wj-Mcat/paddle-cppt/actions?query=workflow:"pypi")
-[![GitHub release](https://img.shields.io/github/release/wj-Mcat/paddle-cppt?include_prereleases=&sort=semver&color=blue)](https://github.com/wj-Mcat/paddle-cppt/releases/)
-[![License](https://img.shields.io/badge/License-Apache_License_2.0-blue)](#license)
-[![issues - paddle-cppt](https://img.shields.io/github/issues/wj-Mcat/paddle-cppt)](https://github.com/wj-Mcat/paddle-cppt/issues)
-
-_Call-to-Action buttons_
-
-<div align="center">
-
-
-
-
-
-</div>
-
-
 
 
 ## License
