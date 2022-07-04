@@ -74,7 +74,7 @@ setuptools.setup(
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
     license='Apache-2.0',
-    url='https://github.com/wechaty/python-wechaty',
+    url='https://github.com/wj-Mcat/paddle-cppt',
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
     install_requires=get_install_requires(),
