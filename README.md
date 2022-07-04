@@ -9,7 +9,7 @@ Convert Pytorch to Paddle Toolkit
 [![wj-Mcat - paddle-cppt](https://img.shields.io/static/v1?label=wj-Mcat&message=paddle-cppt&color=blue&logo=github)](https://github.com/wj-Mcat/paddle-cppt "Go to GitHub repo")
 [![stars - paddle-cppt](https://img.shields.io/github/stars/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
 [![forks - paddle-cppt](https://img.shields.io/github/forks/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
-[![pypi](https://github.com/wj-Mcat/paddle-cppt/workflows/pypi/badge.svg)](https://github.com/wj-Mcat/paddle-cppt/actions?query=workflow:"pypi")
+[![PyPI](https://github.com/wj-Mcat/paddle-cppt/actions/workflows/python-publish.yml/badge.svg)](https://github.com/wj-Mcat/paddle-cppt/actions/workflows/python-publish.yml)
 [![GitHub release](https://img.shields.io/github/release/wj-Mcat/paddle-cppt?include_prereleases=&sort=semver&color=blue)](https://github.com/wj-Mcat/paddle-cppt/releases/)
 [![License](https://img.shields.io/badge/License-Apache_License_2.0-blue)](#license)
 [![issues - paddle-cppt](https://img.shields.io/github/issues/wj-Mcat/paddle-cppt)](https://github.com/wj-Mcat/paddle-cppt/issues)
