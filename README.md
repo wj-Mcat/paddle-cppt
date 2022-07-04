@@ -1,5 +1,34 @@
 # paddle-cppt
 
+<div align="center">
+Convert Pytorch to Paddle Toolkit
+</div>
+
+## Documentation
+
+<div align="center">
+
+[![wj-Mcat - paddle-cppt](https://img.shields.io/static/v1?label=wj-Mcat&message=paddle-cppt&color=blue&logo=github)](https://github.com/wj-Mcat/paddle-cppt "Go to GitHub repo")
+[![stars - paddle-cppt](https://img.shields.io/github/stars/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
+[![forks - paddle-cppt](https://img.shields.io/github/forks/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
+[![pypi](https://github.com/wj-Mcat/paddle-cppt/workflows/pypi/badge.svg)](https://github.com/wj-Mcat/paddle-cppt/actions?query=workflow:"pypi")
+[![GitHub release](https://img.shields.io/github/release/wj-Mcat/paddle-cppt?include_prereleases=&sort=semver&color=blue)](https://github.com/wj-Mcat/paddle-cppt/releases/)
+[![License](https://img.shields.io/badge/License-Apache_License_2.0-blue)](#license)
+[![issues - paddle-cppt](https://img.shields.io/github/issues/wj-Mcat/paddle-cppt)](https://github.com/wj-Mcat/paddle-cppt/issues)
+
+
+</div>
+
+
+<div align="center">
+
+
+
+
+
+</div>
+
+
 Convert Pytorch to Paddle Toolkit
 
 This Repo contains the toolkit that help you transform the pytorch model to paddle model. eg: Weight file Comparer, Weight Converter, Weight Summary, and so on ...
@@ -47,9 +76,23 @@ cd paddle-cpp
 python setup.py install
 ```
 
-### Gen Paddle Weight
+### save paddle state dict
 
-### `cppt gen_diff`
+If you complete the code, you can init the paddle weight file with the following code:
+
+```python
+from paddlenlp.transformers.{your-model}.modeling import {YourModel}
+
+# this code will be different according to different model, but anyway the final result is to save the state dict of model which contains the layer names of your model code.
+model = {YourModel}(
+    model={YourModel}(
+        **{YourModel}.pretrained_init_configuration['{name-of-configuration}']
+    )
+)
+model.save_pretrained('/path/to/local/dir')
+```
+
+### cppt gen_diff
 
 this command will generate the name mapping 
 
@@ -78,16 +121,9 @@ with this command, you will get the `diff.xlsx` file which contains the layer na
 | encoder.layer.0.attention.output.dense.weight     | [768, 768]   | torch.float32 | linear-weight | encoder.layers.0.self_attn.out_proj.bias   | [768]        | paddle.float32 | linear-bias   |
 | encoder.layer.0.attention.output.dense.bias       | [768]        | torch.float32 | linear-bias   | encoder.layers.0.linear1.weight            | [768, 3072]  | paddle.float32 | linear-weight |
 | encoder.layer.0.attention.output.LayerNorm.weight | [768]        | torch.float32 | norm          | encoder.layers.0.linear1.bias              | [3072]       | paddle.float32 | linear-bias   |
-| encoder.layer.0.attention.output.LayerNorm.bias   | [768]        | torch.float32 | norm          | encoder.layers.0.linear2.weight            | [3072, 768]  | paddle.float32 | linear-weight |
-| encoder.layer.0.intermediate.dense.weight         | [3072, 768]  | torch.float32 | linear-weight | encoder.layers.0.linear2.bias              | [768]        | paddle.float32 | linear-bias   |
-| encoder.layer.0.intermediate.dense.bias           | [3072]       | torch.float32 | linear-bias   | encoder.layers.0.norm1.weight              | [768]        | paddle.float32 | norm          |
-| encoder.layer.0.output.dense.weight               | [768, 3072]  | torch.float32 | linear-weight | encoder.layers.0.norm1.bias                | [768]        | paddle.float32 | norm          |
-| encoder.layer.0.output.dense.bias                 | [768]        | torch.float32 | linear-bias   | encoder.layers.0.norm2.weight              | [768]        | paddle.float32 | norm          |
-| encoder.layer.0.output.LayerNorm.weight           | [768]        | torch.float32 | norm          | encoder.layers.0.norm2.bias                | [768]        | paddle.float32 | norm          |
-| encoder.layer.0.output.LayerNorm.bias             | [768]        | torch.float32 | norm          | encoder.layers.1.self_attn.q_proj.weight   | [768, 768]   | paddle.float32 | linear-weight |
 
 
-## `cppt auto_match`
+## cppt auto_match
 
 this command will generate the final name mapping into the excel file.
 
@@ -97,7 +133,7 @@ cppt auto_match \
     --output_file=/path/to/diff-result.xlsx
 ```
 
-## `cppt convert`
+## cppt convert
 
 convert torch model to paddle weight according the final diff file.
 
@@ -108,7 +144,7 @@ cppt convert \
     --diff_file=/path/to/diff-result.xlsx
 ```
 
-## `cppt summary`
+## cppt summary
 
 print the summary metadata info between torch and paddle model
 
@@ -121,7 +157,36 @@ cppt summary \
 
 ## Creators
 
-- [@wj-Mcat](https://github.com/wj-Mcat) - Jingjing WU (吴京京)
+_Social buttons_
+
+[![wj-Mcat - paddle-cppt](https://img.shields.io/static/v1?label=wj-Mcat&message=paddle-cppt&color=blue&logo=github)](https://github.com/wj-Mcat/paddle-cppt "Go to GitHub repo")
+[![stars - paddle-cppt](https://img.shields.io/github/stars/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
+[![forks - paddle-cppt](https://img.shields.io/github/forks/wj-Mcat/paddle-cppt?style=social)](https://github.com/wj-Mcat/paddle-cppt)
+
+
+_Repo metadata_
+
+[![pypi](https://github.com/wj-Mcat/paddle-cppt/workflows/pypi/badge.svg)](https://github.com/wj-Mcat/paddle-cppt/actions?query=workflow:"pypi")
+[![GitHub release](https://img.shields.io/github/release/wj-Mcat/paddle-cppt?include_prereleases=&sort=semver&color=blue)](https://github.com/wj-Mcat/paddle-cppt/releases/)
+[![License](https://img.shields.io/badge/License-Apache_License_2.0-blue)](#license)
+[![issues - paddle-cppt](https://img.shields.io/github/issues/wj-Mcat/paddle-cppt)](https://github.com/wj-Mcat/paddle-cppt/issues)
+
+_Call-to-Action buttons_
+
+<div align="center">
+
+
+
+
+
+</div>
+
+
+
+
+## License
+
+Released under [Apache License 2.0](/LICENSE) by [@wj-Mcat](https://github.com/wj-Mcat).
 
 ## Copyright & License
 

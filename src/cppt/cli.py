@@ -20,6 +20,7 @@ import fire
 from tabulate import tabulate
 from loguru import logger 
 from cppt.config import SIMILARITY_TOKENS
+from cppt.record import TensorComparer, TensorRecorder
 
 
 structure: Structure = None
@@ -510,6 +511,13 @@ class Command:
             tables.append(diff)
         
         print(tabulate(tables, headers=['torch-name', 'torch-sum', 'paddle-name', 'paddle-sum', 'abs-diff'], tablefmt='grid'))
+
+    def compare(self, run_id: str, record_file: str, first_name: str, second_name: str):
+        run_id = str(run_id)
+        first_record = TensorRecorder(run_id=run_id, name=first_name, record_file=record_file)
+        second_record = TensorRecorder(run_id=run_id, name=second_name, record_file=record_file)
+        comparer = TensorComparer(first_record, second_record)
+        comparer.compare()
 
 def main():
     fire.Fire(Command)
