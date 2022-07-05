@@ -12,7 +12,6 @@ nav:
   - 介绍:
     - 'Gen Diff': 'intro/gen_diff.md'
     - 'Auto Match': 'intro/auto_match.md'
-    - 'Recorder': 'intro/recorder.md'
     - 'Summary': 'intro/summary.md'
     - 'Compare': 'intro/compare.md'
   - 模块详解:
@@ -28,7 +27,7 @@ markdown_extensions:
       baselevel: 2
 
 plugins:
-  - search
+  # - search
   - mkdocstrings:
       handlers:
         python:
