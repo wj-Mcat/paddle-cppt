@@ -86,6 +86,7 @@ install-git-hook:
 install:
 	pip3 install -r requirements.txt
 	pip3 install -r requirements-dev.txt
+	pip3 install -r docs/requirements.txt
 
 .PHONY: pytest
 pytest:
@@ -159,3 +160,6 @@ summary:
 		--torch_file=/root/paddle/PaddleNLP/pretrained/torch/opt-125m/pytorch_model.bin \
 		--paddle_file=/root/paddle/PaddleNLP/pretrained/paddle/opt-125m/model_state.pdparams \
 		--diff_file=diff-result.xlsx
+
+docs-serve:
+	mkdocs serve

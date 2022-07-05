@@ -1,0 +1,35 @@
+site_name: Paddle-CPPT 
+repo_url: http://github.com/wj-Mcat/paddle-cppt
+repo_name: wj-mcat/paddle-cppt
+site_description: 'Convert Pytorch to Paddle Toolkit'
+copyright: '@wj-Mcat'
+
+theme:
+  name: material
+
+nav:
+  - 首页: 'index.md'
+  - 介绍:
+    - 'Gen Diff': 'intro/gen_diff.md'
+    - 'Auto Match': 'intro/auto_match.md'
+    - 'Recorder': 'intro/recorder.md'
+    - 'Summary': 'intro/summary.md'
+    - 'Compare': 'intro/compare.md'
+  - 模块详解:
+    - 'cli': 'api/cli.md'
+    - 'structure': 'api/structure.md'
+    - 'recorder': 'api/recorder.md'
+  - FAQ: 'faq.md'
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      baselevel: 2
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]  # search packages in the src folder

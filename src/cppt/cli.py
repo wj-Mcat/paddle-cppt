@@ -464,12 +464,30 @@ class Command:
             self.auto_match(output_file, output_file)
 
     def auto_match(self, diff_file: str, output_file: str, config_file: Optional[str] = None, prefix_words: str = ''):
+        """auto match the names within diff file
+
+        Examples:
+            >>> cppt auto_match --diff_file=./diff.xlsx --output_file=./diff-result.xlsx
+
+        Args:
+            diff_file (str): the path of diff file
+            output_file (str): the result of the auto-matched diff file
+            config_file (Optional[str], optional): configuration for similarity tokens. Defaults to None.
+            prefix_words (str, optional): the prefix of layer name, joined with in '.' character. Defaults to ''.
+        """
         global structure
         structure = Structure(config_file=config_file, prefix_words=prefix_words)
 
         structure.match_from_diff_file(diff_file, output_file)
 
     def convert(self, torch_file: str, diff_file: str, output_file: str):
+        """convert the pytorch model to paddle model weight file by diff file
+
+        Args:
+            torch_file (str): the path of pytorch model weight file
+            diff_file (str): the path of the final correct diff file
+            output_file (str): the path of the generated paddle weight file
+        """
         Torch2PaddleConverter.from_mapping_file(
             torch_file=torch_file,
             output_file=output_file,
@@ -477,6 +495,13 @@ class Command:
         ) 
     
     def summary(self, torch_file: str, paddle_file: str, diff_file: str):
+        """summary the state dict info between in paddle & pytorch weight file within diff file
+
+        Args:
+            torch_file (str): the path of the pytorch weight file
+            paddle_file (str): the path of the paddle weight file
+            diff_file (str): the path of the diff file 
+        """
         # 1. load state dict
         torch_state_dict = torch.load(torch_file)
         paddle_state_dict = paddle.load(paddle_file)
@@ -513,6 +538,16 @@ class Command:
         print(tabulate(tables, headers=['torch-name', 'torch-sum', 'paddle-name', 'paddle-sum', 'abs-diff'], tablefmt='grid'))
 
     def compare(self, run_id: str, record_file: str, first_name: str, second_name: str):
+        """compare the recording which is useful for align the logit between pytorch model and paddle model
+
+        If you want 
+
+        Args:
+            run_id (str): the union id of experiments 
+            record_file (str): the recording file
+            first_name (str): the name of first experiment name, eg: torch 
+            second_name (str): the name of second experiment name, eg: paddle 
+        """
         run_id = str(run_id)
         first_record = TensorRecorder(run_id=run_id, name=first_name, record_file=record_file)
         second_record = TensorRecorder(run_id=run_id, name=second_name, record_file=record_file)

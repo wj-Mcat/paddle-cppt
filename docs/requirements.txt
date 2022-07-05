@@ -1,0 +1,6 @@
+mkdocs
+mkdocs-material
+types-requests
+pytkdocs
+mkdocstrings
+mkdocstrings-python-legacy

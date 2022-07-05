@@ -20,3 +20,8 @@ markers = [
     "asyncio"
 ]
 pythonpath = "./src"
+
+[project]
+dependencies = [
+    "mkdocstrings-python-legacy"
+]
